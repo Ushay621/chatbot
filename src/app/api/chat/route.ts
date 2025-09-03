@@ -1,28 +1,32 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+// ./src/app/api/chat/route.ts
+import { NextRequest, NextResponse } from "next/server";
 
-// Next.js App Router POST handler
-export async function POST(req: Request) {
+// Define the expected request structure
+interface ChatRequest {
+  messages: string[];
+}
+
+// Define the response structure
+interface ChatResponse {
+  reply: string;
+}
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    const { messages } = await req.json();
+    // Parse request body
+    const data: ChatRequest = await req.json();
 
-    // Init Gemini with API Key from .env.local
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    // Example: Generate a simple reply
+    const replyMessage = `You sent ${data.messages.length} message(s)`;
 
-    // Choose Gemini model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const response: ChatResponse = { reply: replyMessage };
 
-    // Call model with user messages
-    const result = await model.generateContent(messages);
-
-    // Send back response
-    return new Response(
-      JSON.stringify({ output: result.response.text() }),
-      { headers: { "Content-Type": "application/json" } }
-    );
-  } catch (e: any) {
-    return new Response(
-      JSON.stringify({ error: e?.message ?? "unknown" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+    return NextResponse.json(response, { status: 200 });
+  } catch (error) {
+    console.error("Error in chat API:", error);
+    return NextResponse.json(
+      { reply: "Something went wrong!" },
+      { status: 500 }
     );
   }
 }
