@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+// Gemini client setup
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const message: string = body?.messages || "Hello";
 
-    // Example: message extract karna
-    const message: string = body?.messages || "No input provided";
+    // Call Gemini model
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent(message);
 
-    // Yahan tum apna Gemini ya chatbot logic likh sakte ho
-    const reply = `You said: ${message}`;
+    // Get AI reply
+    const reply = result.response.text();
 
     return NextResponse.json({ output: reply });
   } catch (error) {
