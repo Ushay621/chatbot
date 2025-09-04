@@ -1,28 +1,21 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { NextRequest, NextResponse } from "next/server";
 
-// Next.js App Router POST handler
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { messages } = await req.json();
+    const body = await req.json();
 
-    // Init Gemini with API Key from .env.local
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    // Example: message extract karna
+    const message: string = body?.messages || "No input provided";
 
-    // Choose Gemini model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Yahan tum apna Gemini ya chatbot logic likh sakte ho
+    const reply = `You said: ${message}`;
 
-    // Call model with user messages
-    const result = await model.generateContent(messages);
-
-    // Send back response
-    return new Response(
-      JSON.stringify({ output: result.response.text() }),
-      { headers: { "Content-Type": "application/json" } }
-    );
-  } catch (e: any) {
-    return new Response(
-      JSON.stringify({ error: e?.message ?? "unknown" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+    return NextResponse.json({ output: reply });
+  } catch (error) {
+    console.error("API Error:", error);
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
     );
   }
 }
